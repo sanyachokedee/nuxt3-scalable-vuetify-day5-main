@@ -37,7 +37,44 @@ const initPage = ref(1)
 
 // Call Product API useStrapiApi
 const { data: products } = await useStrapiApi().getProducts(initPage.value,25);
-console.log(products.value?.data);
+// console.log(products.value?.data);
+
+// สร้างตัวแปรเก็บหน้าปัจจุบัน
+const page:any = ref(products.value?.meta.pagination.page)
+
+// สร้างตัวแปรเก็บค่าหน้าทั้งหมด
+const pageCount: any = ref(products.value?.meta.pagination.pageCount)
+
+// console.log(page.value)
+// console.log(pageCount.value)
+
+// สร้างฟังก์ชันเพื่อเปลี่ยนหน้าที่ต้องการ
+const handlePageChange = async (page: any) => {
+  initPage.value = page
+  // console.log("initPage.value" + initPage.value)
+  // เรียกข้อมูอีกครั้ง
+  const { data: newproducts } = await useStrapiApi().getProducts(initPage.value,25);
+  products.value = newproducts.value
+}
+
+// สร้างฟังก์ชันเพื่อเปลี่ยนหน้าแรก
+const handlePageFirst = async (page: any) => {
+  initPage.value = 1
+  console.log("First initPage.value" + initPage.value)
+  // เรียกข้อมูอีกครั้ง
+  const { data: newproducts } = await useStrapiApi().getProducts(initPage.value,25);
+  products.value = newproducts.value
+}
+
+// สร้างฟังก์ชันไปหน้าสุดท้าย
+const handlePageLast = async (page: any) => {
+  initPage.value = pageCount.value
+  console.log("Last initPage.value" + initPage.value)
+  // เรียกข้อมูอีกครั้ง
+  const { data: newproducts } = await useStrapiApi().getProducts(initPage.value,25);
+  products.value = newproducts.value
+}
+
 
 function close() {
   dialog.value = false;
@@ -144,7 +181,18 @@ const filteredList = computed(() => {
           </v-row>
 
           <!--- Add Pagination -->
-          <v-pagination :length="6"></v-pagination>
+          <button @click="handlePageFirst">First</button>
+          <v-pagination 
+              v-model ="page" 
+              :length="pageCount"
+              @next = "handlePageChange"
+              @prev = "handlePageChange"
+              @update:modelValue = "handlePageChange"
+              @first = "handlePageFirst"
+              @last = "handlePageLast"
+              >
+          </v-pagination>          
+          <button @click="handlePageLast">Last</button>
           <v-table class="mt-5">
             <thead>
               <tr>
@@ -210,4 +258,5 @@ const filteredList = computed(() => {
   </v-row>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>
